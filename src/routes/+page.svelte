@@ -8,7 +8,8 @@
     let part = ""
     let suffix = ""
     let caseSensitive = true
-    let hoveredWord = ""
+    let markSerch = true
+    let currentWord = ""
 
     let words = []
     let filteredWords = []
@@ -25,11 +26,11 @@
 
     function handleInput() {
         clearTimeout(timer)
-        timer = setTimeout(() => filter(prefix, part, suffix), 100)
+        timer = setTimeout(() => filter(prefix, part, suffix), 150)
     }
 
     function filter(prefix, part, suffix) {
-        const r = new RegExp(`^${prefix}.*${part}.*${suffix}$`, caseSensitive ? "" : "i")
+        const r = new RegExp(`^${prefix}.*[^^]${part}[^$].*${suffix}$`, caseSensitive ? "" : "i")
         filteredWords = words.filter(word => r.test(word))
     }
 
@@ -43,6 +44,22 @@
     async function loadInfo(word) {
         const response = await fetch(`https://www.dwds.de/wb/${word}`)
         console.log(response)
+    }
+
+    function markSearchTerm(word) {
+        const pref = word.slice(0, prefix.length)
+        const suffixStart = word.length - suffix.length
+        const suf = word.slice(suffixStart)
+        const middlePart = word.slice(prefix.length, suffixStart)
+        const partIndex = middlePart.indexOf(part)
+        const _1 = middlePart.slice(0, partIndex)
+        const p = middlePart.slice(partIndex, partIndex + part.length)
+        const _2 = middlePart.slice(partIndex + part.length)
+        return `<span class=\"mark\">${pref}</span>`
+            + `${_1}`
+            + `<span class=\"mark\">${p}</span>`
+            + `${_2}`
+            + `<span class=\"mark\">${suf}</span>`
     }
 
 </script>
@@ -88,11 +105,14 @@
                     <label for="case-sensitive">Case sensitive</label>
                 </div>
 
+                <div style="display: flex;">
+                    <input id="mark-search" type="checkbox" bind:checked={markSerch}>
+                    <label for="mark-search">Mark search terms</label>
+                </div>
+
                 <button on:click={reset}>
                     reset
                 </button>
-
-
             </form>
 
             <section>
@@ -102,21 +122,30 @@
                 <p><i>Only the first <input id="word-count" type="number" bind:value={maxCount}> results are shown</i>
                 </p>
             </section>
+
             <section>
                 <p>Words from&nbsp;&thinsp;<a href="https://github.com/enz/german-wordlist">https://github.com/enz/german-wordlist</a>
                 </p>
                 <p>Project repo&nbsp;&thinsp;<a href="https://github.com/Corrl/search-german-words">https://github.com/Corrl/search-german-words</a>
                 </p>
             </section>
+
         </div>
 
         <div id="results">
 
             <table>
                 {#each filteredWords.slice(0, maxCount) as word}
-                    <tr on:click={() => hoveredWord = word}>
+                    <tr on:click={() => currentWord = word}
+                        class:current-word={currentWord === word}
+                    >
                         <td>
-                            {word}
+                            {#if markSerch}
+                                {@html markSearchTerm(word)}
+                                <!--                                <span class="mark">{pref}</span>{_1}<span class="mark">{p}</span>{_2}<span class="mark">{suf}</span>-->
+                            {:else}
+                                {word}
+                            {/if}
                         </td>
                     </tr>
                 {/each}
@@ -130,7 +159,7 @@
                     title="DWDS entry for word"
                     width="100%"
                     height="100%"
-                    src={`https://www.dwds.de/wb/${hoveredWord}`}>
+                    src={`https://www.dwds.de/wb/${currentWord}`}>
             </iframe>
 
         </div>
@@ -201,8 +230,43 @@
         overflow-y: scroll;
     }
 
-    td {
+    tr {
         cursor: pointer;
+        transition: box-shadow 200ms;
+    }
+
+    tr:hover,
+    .current-word {
+        background: rgba(245, 245, 245, 0.99);
+    }
+
+    .current-word {
+        box-shadow: inset 4px 0 0 var(--primary);
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    #results :global(.mark) {
+        font-weight: bold;
+        color: var(--primary);
+        filter: brightness(.95);
+    }
+
+    @media (max-width: 1000px) {
+        main {
+            grid-template-rows: max-content 1fr;
+            grid-template-columns: 100%;
+        }
+
+        #search {
+            padding: 2rem 1rem;
+        }
+
+        #results {
+            border-top: 3px solid var(--table-border-color);
+        }
+        iframe {
+            display: none;
+        }
     }
 
 </style>

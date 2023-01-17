@@ -1,6 +1,7 @@
 <script>
     import '@picocss/pico/css/pico.min.css'
     import './app.css'
+    import {base} from "$app/paths";
 
     let form
     let prefix = ""
@@ -14,7 +15,7 @@
     let maxCount = 100
 
     async function loadWords() {
-        const response = await fetch('/wordlist-german.txt')
+        const response = await fetch(`${base}/wordlist-german.txt`)
         const txt = await response.text()
         words = txt.split('\n')
         filteredWords = words
@@ -53,8 +54,8 @@
             <h1>
                 Loading words...
             </h1>
-            <p>
-                ~30MB
+            <p style="font-size: .8em">
+                ~6&hairsp;MB gzipped (&thinsp;~30&hairsp;MB unzipped&thinsp;)
             </p>
         </div>
     {:then _}
@@ -173,10 +174,6 @@
         font-size: .9rem;
     }
 
-    button {
-        /*grid-column: 2;*/
-    }
-
     section {
         --font-size: .8em;
         --typography-spacing-vertical: .5rem;
@@ -197,7 +194,8 @@
         overflow-y: scroll;
     }
 
-    #word-info {
-        /*border: 1px solid orange;*/
+    td {
+        cursor: pointer;
     }
+
 </style>

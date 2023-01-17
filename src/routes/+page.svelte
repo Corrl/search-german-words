@@ -6,16 +6,18 @@
     let prefix = ""
     let part = ""
     let suffix = ""
+    let caseSensitive = true
+    let hoveredWord = ""
 
     let words = []
     let filteredWords = []
-    let maxCount = 500
+    let maxCount = 100
 
     async function loadWords() {
         const response = await fetch('/wordlist-german.txt')
         const txt = await response.text()
         words = txt.split('\n')
-        filteredWords = words.slice(0, maxCount)
+        filteredWords = words
     }
 
     let timer
@@ -26,8 +28,8 @@
     }
 
     function filter(prefix, part, suffix) {
-        const r = new RegExp(`^${prefix}.*${part}.*${suffix}$`)
-        filteredWords = words.filter(word => r.test(word)).slice(0, maxCount)
+        const r = new RegExp(`^${prefix}.*${part}.*${suffix}$`, caseSensitive ? "" : "i")
+        filteredWords = words.filter(word => r.test(word))
     }
 
     function reset() {
@@ -37,14 +39,17 @@
         form.dispatchEvent(new Event('input'))
     }
 
+    async function loadInfo(word) {
+        const response = await fetch(`https://www.dwds.de/wb/${word}`)
+        console.log(response)
+    }
+
 </script>
 
 <main class="">
 
     {#await loadWords()}
-        <div id="loading"
-             style="grid-column: 1/3; place-self: center"
-        >
+        <div id="loading">
             <h1>
                 Loading words...
             </h1>
@@ -76,31 +81,50 @@
                     <label for="suffix">Ends with</label>
                     <input id="suffix" type="text" bind:value={suffix} placeholder="suffix">
                 </div>
+
+                <div style="display: flex;">
+                    <input id="case-sensitive" type="checkbox" bind:checked={caseSensitive}>
+                    <label for="case-sensitive">Case sensitive</label>
+                </div>
+
                 <button on:click={reset}>
                     reset
                 </button>
+
+
             </form>
 
             <section>
-                <p><b>{words.length.toLocaleString()}</b> words searched</p>
+                <p><b>{words.length.toLocaleString()}</b> words searched - <b>{filteredWords.length.toLocaleString()}</b>
+                    results</p>
+                <p><i>Only the first  <input id="word-count" type="number" bind:value={maxCount}> results are shown</i></p>
                 <p>source: <a href="https://github.com/enz/german-wordlist">https://github.com/enz/german-wordlist</a>
                 </p>
-                <p><i>Only the first 500 results are shown</i></p>
             </section>
         </div>
 
         <div id="results">
 
-
             <table>
-                {#each filteredWords as word}
-                    <tr>
+                {#each filteredWords.slice(0, maxCount) as word}
+                    <tr on:click={() => hoveredWord = word}>
                         <td>
                             {word}
                         </td>
                     </tr>
                 {/each}
             </table>
+
+        </div>
+
+        <div id="word-info">
+
+            <iframe id="dwds-lookup"
+                    title="DWDS entry for word"
+                    width="100%"
+                    height="100%"
+                    src={`https://www.dwds.de/wb/${hoveredWord}`}>
+            </iframe>
 
         </div>
 
@@ -112,16 +136,20 @@
     main {
         height: 100%;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 2fr 1fr 3fr;
         grid-template-rows: 100%;
-        overflow-y: scroll;
+
+        --form-element-spacing-vertical: 3px;
+        --form-element-spacing-horizontal: 8px;
+    }
+
+    #loading {
+        grid-column: 1/4;
+        place-self: center;
     }
 
     #search {
-        justify-self: flex-end;
-        position: sticky;
-        top: 0;
-        padding: 4rem 2rem 0 0;
+        padding: 4rem 2.5rem;
         /*border: 1px solid purple;*/
     }
 
@@ -134,13 +162,19 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: .5rem;
-        max-width: 30rem;
-        font-size: .8em;
         /*border: 1px solid teal;*/
     }
 
+    label {
+        font-size: .7rem;
+    }
+
+    input {
+        font-size: .9rem;
+    }
+
     button {
-        grid-column: 2;
+        /*grid-column: 2;*/
     }
 
     section {
@@ -148,9 +182,22 @@
         --typography-spacing-vertical: .5rem;
     }
 
-    #results {
-        width: 100%;
-        border-left: var(--border-width) solid var(--table-border-color);
+    #word-count {
+        display: inline;
+        width: 3rem;
+        height: revert;
+        margin: 0;
+        padding: 0 0 0 4px;
+        font-size: .95em;
     }
 
+    #results {
+        min-width: 22ch;
+        border-left: var(--border-width) solid var(--table-border-color);
+        overflow-y: scroll;
+    }
+
+    #word-info {
+        /*border: 1px solid orange;*/
+    }
 </style>

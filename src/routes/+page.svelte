@@ -226,7 +226,7 @@
     }
 
     #results {
-        min-width: 22ch;
+        min-width: 16ch;
         border-left: 2px solid var(--table-border-color);
         overflow-y: scroll;
     }
@@ -265,6 +265,7 @@
         #results {
             border-top: 3px solid var(--table-border-color);
         }
+
         iframe {
             display: none;
         }

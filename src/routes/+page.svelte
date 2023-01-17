@@ -203,6 +203,7 @@
 
     label {
         font-size: .7rem;
+        user-select: none;
     }
 
     input {
@@ -226,7 +227,7 @@
 
     #results {
         min-width: 22ch;
-        border-left: var(--border-width) solid var(--table-border-color);
+        border-left: 2px solid var(--table-border-color);
         overflow-y: scroll;
     }
 

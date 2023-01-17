@@ -96,10 +96,16 @@
             </form>
 
             <section>
-                <p><b>{words.length.toLocaleString()}</b> words searched - <b>{filteredWords.length.toLocaleString()}</b>
+                <p><b>{words.length.toLocaleString()}</b> words searched -
+                    <b>{filteredWords.length.toLocaleString()}</b>
                     results</p>
-                <p><i>Only the first  <input id="word-count" type="number" bind:value={maxCount}> results are shown</i></p>
-                <p>source: <a href="https://github.com/enz/german-wordlist">https://github.com/enz/german-wordlist</a>
+                <p><i>Only the first <input id="word-count" type="number" bind:value={maxCount}> results are shown</i>
+                </p>
+            </section>
+            <section>
+                <p>Words from&nbsp;&thinsp;<a href="https://github.com/enz/german-wordlist">https://github.com/enz/german-wordlist</a>
+                </p>
+                <p>Project repo&nbsp;&thinsp;<a href="https://github.com/Corrl/search-german-words">https://github.com/Corrl/search-german-words</a>
                 </p>
             </section>
         </div>
@@ -176,7 +182,8 @@
 
     section {
         --font-size: .8em;
-        --typography-spacing-vertical: .5rem;
+        --typography-spacing-vertical: .3rem;
+        --block-spacing-vertical: 1rem;
     }
 
     #word-count {

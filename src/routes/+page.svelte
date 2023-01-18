@@ -30,7 +30,18 @@
     }
 
     function filter(prefix, part, suffix) {
-        const r = new RegExp(`^${prefix}.*[^^]${part}[^$].*${suffix}$`, caseSensitive ? "" : "i")
+        let r
+        const flag = caseSensitive ? "" : "i"
+        if (prefix.length > 0 && suffix.length > 0) {
+            r = new RegExp(`^${prefix}.*${part}.*${suffix}$`, flag)
+        } else if (prefix.length === 0 && suffix.length > 0) {
+            r = new RegExp(`^.+${part}.*${suffix}$`, flag)
+        } else if (prefix.length > 0 && suffix.length === 0) {
+            r = new RegExp(`^${prefix}.*${part}.+$`, flag)
+        } else if (prefix.length === 0 && suffix.length === 0) {
+            r = new RegExp(`^.+${part}.+$`, flag)
+        }
+        // const r = new RegExp(`^${prefix}.*[^^]${part}[^$].*${suffix}$`, caseSensitive ? "" : "i")
         filteredWords = words.filter(word => r.test(word))
     }
 
@@ -208,6 +219,11 @@
 
     input {
         font-size: .9rem;
+    }
+
+    ::placeholder {
+      font-weight: normal;
+        color: #b3b3b3;
     }
 
     section {
